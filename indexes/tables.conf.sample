@@ -1,0 +1,8 @@
+#Devices:  dev/node max_tables
+Device: /dev/sda1 10
+Device: /dev/sdb1 10
+Device: /dev/sdd1 10
+Device: /dev/sde1 10
+
+#Tables: dev id(advance) offset
+
