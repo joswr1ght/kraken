@@ -1,0 +1,594 @@
+
+/***************************************************************
+ * A5/1 Chain generator.
+ *
+ * Copyright 2009. Frank A. Stevenson. All rights reserved.
+ *
+ * Permission to distribute, modify and copy is granted to the
+ * TMTO project, currently hosted at:
+ * 
+ * http://reflextor.com/trac/a51
+ *
+ * Code may be modifed and used, but not distributed by anyone.
+ *
+ * Request for alternative licencing may be directed to the author.
+ *
+ * All (modified) copies of this source must retain this copyright notice.
+ *
+ *******************************************************************/
+
+kernel void a5slicer(uint rounds, out uint4 state[],
+                     uint control<>, out uint2 result<> ) {
+    uint4 reg1;
+    uint4 reg2;
+	uint4 reg3;
+	uint4 reg4;
+	uint4 reg5;
+	uint4 reg6;
+	uint4 reg7;
+	uint4 reg8;
+    uint4 reg9;
+    uint4 reg10;
+	uint4 reg11;
+	uint4 reg12;
+	uint4 reg13;
+	uint4 reg14;
+	uint4 reg15;
+	uint4 reg16;
+
+    int my = instance().x * 32;
+
+    uint4 out1;
+    uint4 out2;
+    uint4 out3;
+    uint4 out4;
+    uint4 out5;
+    uint4 out6;
+    uint4 out7;
+    uint4 out8;
+    uint4 out9;
+    uint4 out10;
+    uint4 out11;
+    uint4 out12;
+    uint4 out13;
+    uint4 out14;
+    uint4 out15;
+    uint4 out16;
+
+    uint4 fin1 = state[my+16];
+    uint4 fin2 = state[my+17];
+    uint4 fin3 = state[my+18];
+    uint4 fin4 = state[my+19];
+    uint4 fin5 = state[my+20];
+    uint4 fin6 = state[my+21];
+    uint4 fin7 = state[my+22];
+    uint4 fin8 = state[my+23];
+    uint4 fin9 = state[my+24];
+    uint4 fin10 = state[my+25];
+    uint4 fin11 = state[my+26];
+    uint4 fin12 = state[my+27];
+    uint4 fin13 = state[my+28];
+    uint4 fin14 = state[my+29];
+    uint4 fin15 = state[my+30];
+    uint4 fin16 = state[my+31];
+
+	uint clock1;
+	uint clock2;
+	uint clock3;
+    uint iclk1;
+    uint iclk2;
+    uint iclk3;
+
+	uint cr1r2;
+	uint cr1r3;
+	uint cr2r3;
+
+    uint fb1;
+    uint fb2;
+    uint fb3;
+
+	uint i;
+    int  j;
+	uint tmp;
+    uint res;
+    uint ctrl = control;
+
+	for( i = 0; i < rounds ; i++ ) {
+        out1 = state[my];
+        out2 = state[my+1];
+        out3 = state[my+2];
+        out4 = state[my+3];
+        out5 = state[my+4];
+        out6 = state[my+5];
+        out7 = state[my+6];
+        out8 = state[my+7];
+        out9 = state[my+8];
+        out10 = state[my+9];
+        out11 = state[my+10];
+        out12 = state[my+11];
+        out13 = state[my+12];
+        out14 = state[my+13];
+        out15 = state[my+14];
+        out16 = state[my+15];
+
+        reg1 = out1 ^ fin1;
+		reg2 = out2 ^ fin2;
+		reg3 = out3 ^ fin3;
+		reg4 = out4 ^ fin4;
+		reg5 = out5 ^ fin5;
+		reg6 = out6 ^ fin6;
+		reg7 = out7 ^ fin7;
+        reg8 = out8 ^ fin8;
+		reg9 = out9 ^ fin9;
+		reg10 = out10 ^ fin10;
+		reg11 = out11 ^ fin11;
+        reg12 = out12 ^ fin12;
+		reg13 = out13 ^ fin13;
+		reg14 = out14 ^ fin14;
+        reg15 = out15 ^ fin15;
+        reg16 = out16 ^ fin16;
+
+        res = reg1.x | reg1.y | reg1.z | reg1.w |
+            reg2.x | reg2.y | reg2.z | reg2.w |
+            reg3.x | reg3.y | reg3.z | reg3.w |
+            reg4.x | reg4.y | ctrl;
+
+        if (res!=0xffffffffu) break;
+
+        ctrl = 0u;
+
+
+        for (j = 0; j<99; j++) {
+            /* Extra (discarded clockings) */
+            cr1r2 = ~(reg14.w ^ reg9.z);
+            cr1r3 = ~(reg14.w ^ reg4.x);
+            cr2r3 = ~(reg9.z  ^ reg4.x);
+            clock1 = cr1r2 | cr1r3;
+            clock2 = cr1r2 | cr2r3;
+            clock3 = cr1r3 | cr2r3;
+            fb1 = (reg12.y ^ reg12.z ^ reg12.w ^ reg13.z) & clock1;
+            fb2 = (reg6.w ^ reg7.x) & clock2;
+            fb3 = (reg1.x ^ reg1.y ^ reg1.z ^ reg4.w) & clock3;
+            iclk1 = ~clock1;
+            iclk2 = ~clock2;
+            iclk3 = ~clock3;
+            reg1.x = (reg1.x & iclk3) | (reg1.y & clock3);
+            reg1.y = (reg1.y & iclk3) | (reg1.z & clock3);
+            reg1.z = (reg1.z & iclk3) | (reg1.w & clock3);
+            reg1.w = (reg1.w & iclk3) | (reg2.x & clock3);
+            reg2.x = (reg2.x & iclk3) | (reg2.y & clock3);
+            reg2.y = (reg2.y & iclk3) | (reg2.z & clock3);
+            reg2.z = (reg2.z & iclk3) | (reg2.w & clock3);
+            reg2.w = (reg2.w & iclk3) | (reg3.x & clock3);
+            reg3.x = (reg3.x & iclk3) | (reg3.y & clock3);
+            reg3.y = (reg3.y & iclk3) | (reg3.z & clock3);
+            reg3.z = (reg3.z & iclk3) | (reg3.w & clock3);
+            reg3.w = (reg3.w & iclk3) | (reg4.x & clock3);
+            reg4.x = (reg4.x & iclk3) | (reg4.y & clock3);
+            reg4.y = (reg4.y & iclk3) | (reg4.z & clock3);
+            reg4.z = (reg4.z & iclk3) | (reg4.w & clock3);
+            reg4.w = (reg4.w & iclk3) | (reg5.x & clock3);
+            reg5.x = (reg5.x & iclk3) | (reg5.y & clock3);
+            reg5.y = (reg5.y & iclk3) | (reg5.z & clock3);
+            reg5.z = (reg5.z & iclk3) | (reg5.w & clock3);
+            reg5.w = (reg5.w & iclk3) | (reg6.x & clock3);
+            reg6.x = (reg6.x & iclk3) | (reg6.y & clock3);
+            reg6.y = (reg6.y & iclk3) | (reg6.z & clock3);
+            reg6.z = (reg6.z & iclk3) | fb3;
+            reg6.w = (reg6.w & iclk2) | (reg7.x & clock2);;
+            reg7.x = (reg7.x & iclk2) | (reg7.y & clock2);
+            reg7.y = (reg7.y & iclk2) | (reg7.z & clock2);
+            reg7.z = (reg7.z & iclk2) | (reg7.w & clock2);
+            reg7.w = (reg7.w & iclk2) | (reg8.x & clock2);
+            reg8.x = (reg8.x & iclk2) | (reg8.y & clock2);
+            reg8.y = (reg8.y & iclk2) | (reg8.z & clock2);
+            reg8.z = (reg8.z & iclk2) | (reg8.w & clock2);
+            reg8.w = (reg8.w & iclk2) | (reg9.x & clock2);
+            reg9.x = (reg9.x & iclk2) | (reg9.y & clock2);
+            reg9.y = (reg9.y & iclk2) | (reg9.z & clock2);
+            reg9.z = (reg9.z & iclk2) | (reg9.w & clock2);
+            reg9.w = (reg9.w & iclk2) | (reg10.x & clock2);
+            reg10.x = (reg10.x & iclk2) | (reg10.y & clock2);
+            reg10.y = (reg10.y & iclk2) | (reg10.z & clock2);
+            reg10.z = (reg10.z & iclk2) | (reg10.w & clock2);
+            reg10.w = (reg10.w & iclk2) | (reg11.x & clock2);
+            reg11.x = (reg11.x & iclk2) | (reg11.y & clock2);
+            reg11.y = (reg11.y & iclk2) | (reg11.z & clock2);
+            reg11.z = (reg11.z & iclk2) | (reg11.w & clock2);
+            reg11.w = (reg11.w & iclk2) | (reg12.x & clock2);
+            reg12.x = (reg12.x & iclk2) | fb2;
+            reg12.y = (reg12.y & iclk1) | (reg12.z & clock1);
+            reg12.z = (reg12.z & iclk1) | (reg12.w & clock1);
+            reg12.w = (reg12.w & iclk1) | (reg13.x & clock1);
+            reg13.x = (reg13.x & iclk1) | (reg13.y & clock1);
+            reg13.y = (reg13.y & iclk1) | (reg13.z & clock1);
+            reg13.z = (reg13.z & iclk1) | (reg13.w & clock1);
+            reg13.w = (reg13.w & iclk1) | (reg14.x & clock1);
+            reg14.x = (reg14.x & iclk1) | (reg14.y & clock1);
+            reg14.y = (reg14.y & iclk1) | (reg14.z & clock1);
+            reg14.z = (reg14.z & iclk1) | (reg14.w & clock1);
+            reg14.w = (reg14.w & iclk1) | (reg15.x & clock1);
+            reg15.x = (reg15.x & iclk1) | (reg15.y & clock1);
+            reg15.y = (reg15.y & iclk1) | (reg15.z & clock1);
+            reg15.z = (reg15.z & iclk1) | (reg15.w & clock1);
+            reg15.w = (reg15.w & iclk1) | (reg16.x & clock1);
+            reg16.x = (reg16.x & iclk1) | (reg16.y & clock1);
+            reg16.y = (reg16.y & iclk1) | (reg16.z & clock1);
+            reg16.z = (reg16.z & iclk1) | (reg16.w & clock1);
+            reg16.w = (reg16.w & iclk1) | fb1;
+        }
+
+        for(j = 0; j < 16; j++) {
+            cr1r2 = ~(reg14.w ^ reg9.z);
+            cr1r3 = ~(reg14.w ^ reg4.x);
+            cr2r3 = ~(reg9.z  ^ reg4.x);
+            clock1 = cr1r2 | cr1r3;
+            clock2 = cr1r2 | cr2r3;
+            clock3 = cr1r3 | cr2r3;
+            fb1 = (reg12.y ^ reg12.z ^ reg12.w ^ reg13.z) & clock1;
+            fb2 = (reg6.w ^ reg7.x) & clock2;
+            fb3 = (reg1.x ^ reg1.y ^ reg1.z ^ reg4.w) & clock3;
+            iclk1 = ~clock1;
+            iclk2 = ~clock2;
+            iclk3 = ~clock3;
+            reg1.x = (reg1.x & iclk3) | (reg1.y & clock3);
+            reg1.y = (reg1.y & iclk3) | (reg1.z & clock3);
+            reg1.z = (reg1.z & iclk3) | (reg1.w & clock3);
+            reg1.w = (reg1.w & iclk3) | (reg2.x & clock3);
+            reg2.x = (reg2.x & iclk3) | (reg2.y & clock3);
+            reg2.y = (reg2.y & iclk3) | (reg2.z & clock3);
+            reg2.z = (reg2.z & iclk3) | (reg2.w & clock3);
+            reg2.w = (reg2.w & iclk3) | (reg3.x & clock3);
+            reg3.x = (reg3.x & iclk3) | (reg3.y & clock3);
+            reg3.y = (reg3.y & iclk3) | (reg3.z & clock3);
+            reg3.z = (reg3.z & iclk3) | (reg3.w & clock3);
+            reg3.w = (reg3.w & iclk3) | (reg4.x & clock3);
+            reg4.x = (reg4.x & iclk3) | (reg4.y & clock3);
+            reg4.y = (reg4.y & iclk3) | (reg4.z & clock3);
+            reg4.z = (reg4.z & iclk3) | (reg4.w & clock3);
+            reg4.w = (reg4.w & iclk3) | (reg5.x & clock3);
+            reg5.x = (reg5.x & iclk3) | (reg5.y & clock3);
+            reg5.y = (reg5.y & iclk3) | (reg5.z & clock3);
+            reg5.z = (reg5.z & iclk3) | (reg5.w & clock3);
+            reg5.w = (reg5.w & iclk3) | (reg6.x & clock3);
+            reg6.x = (reg6.x & iclk3) | (reg6.y & clock3);
+            reg6.y = (reg6.y & iclk3) | (reg6.z & clock3);
+            reg6.z = (reg6.z & iclk3) | fb3;
+            reg6.w = (reg6.w & iclk2) | (reg7.x & clock2);;
+            reg7.x = (reg7.x & iclk2) | (reg7.y & clock2);
+            reg7.y = (reg7.y & iclk2) | (reg7.z & clock2);
+            reg7.z = (reg7.z & iclk2) | (reg7.w & clock2);
+            reg7.w = (reg7.w & iclk2) | (reg8.x & clock2);
+            reg8.x = (reg8.x & iclk2) | (reg8.y & clock2);
+            reg8.y = (reg8.y & iclk2) | (reg8.z & clock2);
+            reg8.z = (reg8.z & iclk2) | (reg8.w & clock2);
+            reg8.w = (reg8.w & iclk2) | (reg9.x & clock2);
+            reg9.x = (reg9.x & iclk2) | (reg9.y & clock2);
+            reg9.y = (reg9.y & iclk2) | (reg9.z & clock2);
+            reg9.z = (reg9.z & iclk2) | (reg9.w & clock2);
+            reg9.w = (reg9.w & iclk2) | (reg10.x & clock2);
+            reg10.x = (reg10.x & iclk2) | (reg10.y & clock2);
+            reg10.y = (reg10.y & iclk2) | (reg10.z & clock2);
+            reg10.z = (reg10.z & iclk2) | (reg10.w & clock2);
+            reg10.w = (reg10.w & iclk2) | (reg11.x & clock2);
+            reg11.x = (reg11.x & iclk2) | (reg11.y & clock2);
+            reg11.y = (reg11.y & iclk2) | (reg11.z & clock2);
+            reg11.z = (reg11.z & iclk2) | (reg11.w & clock2);
+            reg11.w = (reg11.w & iclk2) | (reg12.x & clock2);
+            reg12.x = (reg12.x & iclk2) | fb2;
+            reg12.y = (reg12.y & iclk1) | (reg12.z & clock1);
+            reg12.z = (reg12.z & iclk1) | (reg12.w & clock1);
+            reg12.w = (reg12.w & iclk1) | (reg13.x & clock1);
+            reg13.x = (reg13.x & iclk1) | (reg13.y & clock1);
+            reg13.y = (reg13.y & iclk1) | (reg13.z & clock1);
+            reg13.z = (reg13.z & iclk1) | (reg13.w & clock1);
+            reg13.w = (reg13.w & iclk1) | (reg14.x & clock1);
+            reg14.x = (reg14.x & iclk1) | (reg14.y & clock1);
+            reg14.y = (reg14.y & iclk1) | (reg14.z & clock1);
+            reg14.z = (reg14.z & iclk1) | (reg14.w & clock1);
+            reg14.w = (reg14.w & iclk1) | (reg15.x & clock1);
+            reg15.x = (reg15.x & iclk1) | (reg15.y & clock1);
+            reg15.y = (reg15.y & iclk1) | (reg15.z & clock1);
+            reg15.z = (reg15.z & iclk1) | (reg15.w & clock1);
+            reg15.w = (reg15.w & iclk1) | (reg16.x & clock1);
+            reg16.x = (reg16.x & iclk1) | (reg16.y & clock1);
+            reg16.y = (reg16.y & iclk1) | (reg16.z & clock1);
+            reg16.z = (reg16.z & iclk1) | (reg16.w & clock1);
+            reg16.w = (reg16.w & iclk1) | fb1;
+            out1.x   = (reg1.x ^ reg6.w ^ reg12.y);
+
+            cr1r2 = ~(reg14.w ^ reg9.z);
+            cr1r3 = ~(reg14.w ^ reg4.x);
+            cr2r3 = ~(reg9.z  ^ reg4.x);
+            clock1 = cr1r2 | cr1r3;
+            clock2 = cr1r2 | cr2r3;
+            clock3 = cr1r3 | cr2r3;
+            fb1 = (reg12.y ^ reg12.z ^ reg12.w ^ reg13.z) & clock1;
+            fb2 = (reg6.w ^ reg7.x) & clock2;
+            fb3 = (reg1.x ^ reg1.y ^ reg1.z ^ reg4.w) & clock3;
+            iclk1 = ~clock1;
+            iclk2 = ~clock2;
+            iclk3 = ~clock3;
+            reg1.x = (reg1.x & iclk3) | (reg1.y & clock3);
+            reg1.y = (reg1.y & iclk3) | (reg1.z & clock3);
+            reg1.z = (reg1.z & iclk3) | (reg1.w & clock3);
+            reg1.w = (reg1.w & iclk3) | (reg2.x & clock3);
+            reg2.x = (reg2.x & iclk3) | (reg2.y & clock3);
+            reg2.y = (reg2.y & iclk3) | (reg2.z & clock3);
+            reg2.z = (reg2.z & iclk3) | (reg2.w & clock3);
+            reg2.w = (reg2.w & iclk3) | (reg3.x & clock3);
+            reg3.x = (reg3.x & iclk3) | (reg3.y & clock3);
+            reg3.y = (reg3.y & iclk3) | (reg3.z & clock3);
+            reg3.z = (reg3.z & iclk3) | (reg3.w & clock3);
+            reg3.w = (reg3.w & iclk3) | (reg4.x & clock3);
+            reg4.x = (reg4.x & iclk3) | (reg4.y & clock3);
+            reg4.y = (reg4.y & iclk3) | (reg4.z & clock3);
+            reg4.z = (reg4.z & iclk3) | (reg4.w & clock3);
+            reg4.w = (reg4.w & iclk3) | (reg5.x & clock3);
+            reg5.x = (reg5.x & iclk3) | (reg5.y & clock3);
+            reg5.y = (reg5.y & iclk3) | (reg5.z & clock3);
+            reg5.z = (reg5.z & iclk3) | (reg5.w & clock3);
+            reg5.w = (reg5.w & iclk3) | (reg6.x & clock3);
+            reg6.x = (reg6.x & iclk3) | (reg6.y & clock3);
+            reg6.y = (reg6.y & iclk3) | (reg6.z & clock3);
+            reg6.z = (reg6.z & iclk3) | fb3;
+            reg6.w = (reg6.w & iclk2) | (reg7.x & clock2);;
+            reg7.x = (reg7.x & iclk2) | (reg7.y & clock2);
+            reg7.y = (reg7.y & iclk2) | (reg7.z & clock2);
+            reg7.z = (reg7.z & iclk2) | (reg7.w & clock2);
+            reg7.w = (reg7.w & iclk2) | (reg8.x & clock2);
+            reg8.x = (reg8.x & iclk2) | (reg8.y & clock2);
+            reg8.y = (reg8.y & iclk2) | (reg8.z & clock2);
+            reg8.z = (reg8.z & iclk2) | (reg8.w & clock2);
+            reg8.w = (reg8.w & iclk2) | (reg9.x & clock2);
+            reg9.x = (reg9.x & iclk2) | (reg9.y & clock2);
+            reg9.y = (reg9.y & iclk2) | (reg9.z & clock2);
+            reg9.z = (reg9.z & iclk2) | (reg9.w & clock2);
+            reg9.w = (reg9.w & iclk2) | (reg10.x & clock2);
+            reg10.x = (reg10.x & iclk2) | (reg10.y & clock2);
+            reg10.y = (reg10.y & iclk2) | (reg10.z & clock2);
+            reg10.z = (reg10.z & iclk2) | (reg10.w & clock2);
+            reg10.w = (reg10.w & iclk2) | (reg11.x & clock2);
+            reg11.x = (reg11.x & iclk2) | (reg11.y & clock2);
+            reg11.y = (reg11.y & iclk2) | (reg11.z & clock2);
+            reg11.z = (reg11.z & iclk2) | (reg11.w & clock2);
+            reg11.w = (reg11.w & iclk2) | (reg12.x & clock2);
+            reg12.x = (reg12.x & iclk2) | fb2;
+            reg12.y = (reg12.y & iclk1) | (reg12.z & clock1);
+            reg12.z = (reg12.z & iclk1) | (reg12.w & clock1);
+            reg12.w = (reg12.w & iclk1) | (reg13.x & clock1);
+            reg13.x = (reg13.x & iclk1) | (reg13.y & clock1);
+            reg13.y = (reg13.y & iclk1) | (reg13.z & clock1);
+            reg13.z = (reg13.z & iclk1) | (reg13.w & clock1);
+            reg13.w = (reg13.w & iclk1) | (reg14.x & clock1);
+            reg14.x = (reg14.x & iclk1) | (reg14.y & clock1);
+            reg14.y = (reg14.y & iclk1) | (reg14.z & clock1);
+            reg14.z = (reg14.z & iclk1) | (reg14.w & clock1);
+            reg14.w = (reg14.w & iclk1) | (reg15.x & clock1);
+            reg15.x = (reg15.x & iclk1) | (reg15.y & clock1);
+            reg15.y = (reg15.y & iclk1) | (reg15.z & clock1);
+            reg15.z = (reg15.z & iclk1) | (reg15.w & clock1);
+            reg15.w = (reg15.w & iclk1) | (reg16.x & clock1);
+            reg16.x = (reg16.x & iclk1) | (reg16.y & clock1);
+            reg16.y = (reg16.y & iclk1) | (reg16.z & clock1);
+            reg16.z = (reg16.z & iclk1) | (reg16.w & clock1);
+            reg16.w = (reg16.w & iclk1) | fb1;
+            out1.y   = (reg1.x ^ reg6.w ^ reg12.y);
+
+            cr1r2 = ~(reg14.w ^ reg9.z);
+            cr1r3 = ~(reg14.w ^ reg4.x);
+            cr2r3 = ~(reg9.z  ^ reg4.x);
+            clock1 = cr1r2 | cr1r3;
+            clock2 = cr1r2 | cr2r3;
+            clock3 = cr1r3 | cr2r3;
+            fb1 = (reg12.y ^ reg12.z ^ reg12.w ^ reg13.z) & clock1;
+            fb2 = (reg6.w ^ reg7.x) & clock2;
+            fb3 = (reg1.x ^ reg1.y ^ reg1.z ^ reg4.w) & clock3;
+            iclk1 = ~clock1;
+            iclk2 = ~clock2;
+            iclk3 = ~clock3;
+            reg1.x = (reg1.x & iclk3) | (reg1.y & clock3);
+            reg1.y = (reg1.y & iclk3) | (reg1.z & clock3);
+            reg1.z = (reg1.z & iclk3) | (reg1.w & clock3);
+            reg1.w = (reg1.w & iclk3) | (reg2.x & clock3);
+            reg2.x = (reg2.x & iclk3) | (reg2.y & clock3);
+            reg2.y = (reg2.y & iclk3) | (reg2.z & clock3);
+            reg2.z = (reg2.z & iclk3) | (reg2.w & clock3);
+            reg2.w = (reg2.w & iclk3) | (reg3.x & clock3);
+            reg3.x = (reg3.x & iclk3) | (reg3.y & clock3);
+            reg3.y = (reg3.y & iclk3) | (reg3.z & clock3);
+            reg3.z = (reg3.z & iclk3) | (reg3.w & clock3);
+            reg3.w = (reg3.w & iclk3) | (reg4.x & clock3);
+            reg4.x = (reg4.x & iclk3) | (reg4.y & clock3);
+            reg4.y = (reg4.y & iclk3) | (reg4.z & clock3);
+            reg4.z = (reg4.z & iclk3) | (reg4.w & clock3);
+            reg4.w = (reg4.w & iclk3) | (reg5.x & clock3);
+            reg5.x = (reg5.x & iclk3) | (reg5.y & clock3);
+            reg5.y = (reg5.y & iclk3) | (reg5.z & clock3);
+            reg5.z = (reg5.z & iclk3) | (reg5.w & clock3);
+            reg5.w = (reg5.w & iclk3) | (reg6.x & clock3);
+            reg6.x = (reg6.x & iclk3) | (reg6.y & clock3);
+            reg6.y = (reg6.y & iclk3) | (reg6.z & clock3);
+            reg6.z = (reg6.z & iclk3) | fb3;
+            reg6.w = (reg6.w & iclk2) | (reg7.x & clock2);;
+            reg7.x = (reg7.x & iclk2) | (reg7.y & clock2);
+            reg7.y = (reg7.y & iclk2) | (reg7.z & clock2);
+            reg7.z = (reg7.z & iclk2) | (reg7.w & clock2);
+            reg7.w = (reg7.w & iclk2) | (reg8.x & clock2);
+            reg8.x = (reg8.x & iclk2) | (reg8.y & clock2);
+            reg8.y = (reg8.y & iclk2) | (reg8.z & clock2);
+            reg8.z = (reg8.z & iclk2) | (reg8.w & clock2);
+            reg8.w = (reg8.w & iclk2) | (reg9.x & clock2);
+            reg9.x = (reg9.x & iclk2) | (reg9.y & clock2);
+            reg9.y = (reg9.y & iclk2) | (reg9.z & clock2);
+            reg9.z = (reg9.z & iclk2) | (reg9.w & clock2);
+            reg9.w = (reg9.w & iclk2) | (reg10.x & clock2);
+            reg10.x = (reg10.x & iclk2) | (reg10.y & clock2);
+            reg10.y = (reg10.y & iclk2) | (reg10.z & clock2);
+            reg10.z = (reg10.z & iclk2) | (reg10.w & clock2);
+            reg10.w = (reg10.w & iclk2) | (reg11.x & clock2);
+            reg11.x = (reg11.x & iclk2) | (reg11.y & clock2);
+            reg11.y = (reg11.y & iclk2) | (reg11.z & clock2);
+            reg11.z = (reg11.z & iclk2) | (reg11.w & clock2);
+            reg11.w = (reg11.w & iclk2) | (reg12.x & clock2);
+            reg12.x = (reg12.x & iclk2) | fb2;
+            reg12.y = (reg12.y & iclk1) | (reg12.z & clock1);
+            reg12.z = (reg12.z & iclk1) | (reg12.w & clock1);
+            reg12.w = (reg12.w & iclk1) | (reg13.x & clock1);
+            reg13.x = (reg13.x & iclk1) | (reg13.y & clock1);
+            reg13.y = (reg13.y & iclk1) | (reg13.z & clock1);
+            reg13.z = (reg13.z & iclk1) | (reg13.w & clock1);
+            reg13.w = (reg13.w & iclk1) | (reg14.x & clock1);
+            reg14.x = (reg14.x & iclk1) | (reg14.y & clock1);
+            reg14.y = (reg14.y & iclk1) | (reg14.z & clock1);
+            reg14.z = (reg14.z & iclk1) | (reg14.w & clock1);
+            reg14.w = (reg14.w & iclk1) | (reg15.x & clock1);
+            reg15.x = (reg15.x & iclk1) | (reg15.y & clock1);
+            reg15.y = (reg15.y & iclk1) | (reg15.z & clock1);
+            reg15.z = (reg15.z & iclk1) | (reg15.w & clock1);
+            reg15.w = (reg15.w & iclk1) | (reg16.x & clock1);
+            reg16.x = (reg16.x & iclk1) | (reg16.y & clock1);
+            reg16.y = (reg16.y & iclk1) | (reg16.z & clock1);
+            reg16.z = (reg16.z & iclk1) | (reg16.w & clock1);
+            reg16.w = (reg16.w & iclk1) | fb1;
+            out1.z   = (reg1.x ^ reg6.w ^ reg12.y);
+
+            cr1r2 = ~(reg14.w ^ reg9.z);
+            cr1r3 = ~(reg14.w ^ reg4.x);
+            cr2r3 = ~(reg9.z  ^ reg4.x);
+            clock1 = cr1r2 | cr1r3;
+            clock2 = cr1r2 | cr2r3;
+            clock3 = cr1r3 | cr2r3;
+            fb1 = (reg12.y ^ reg12.z ^ reg12.w ^ reg13.z) & clock1;
+            fb2 = (reg6.w ^ reg7.x) & clock2;
+            fb3 = (reg1.x ^ reg1.y ^ reg1.z ^ reg4.w) & clock3;
+            iclk1 = ~clock1;
+            iclk2 = ~clock2;
+            iclk3 = ~clock3;
+            reg1.x = (reg1.x & iclk3) | (reg1.y & clock3);
+            reg1.y = (reg1.y & iclk3) | (reg1.z & clock3);
+            reg1.z = (reg1.z & iclk3) | (reg1.w & clock3);
+            reg1.w = (reg1.w & iclk3) | (reg2.x & clock3);
+            reg2.x = (reg2.x & iclk3) | (reg2.y & clock3);
+            reg2.y = (reg2.y & iclk3) | (reg2.z & clock3);
+            reg2.z = (reg2.z & iclk3) | (reg2.w & clock3);
+            reg2.w = (reg2.w & iclk3) | (reg3.x & clock3);
+            reg3.x = (reg3.x & iclk3) | (reg3.y & clock3);
+            reg3.y = (reg3.y & iclk3) | (reg3.z & clock3);
+            reg3.z = (reg3.z & iclk3) | (reg3.w & clock3);
+            reg3.w = (reg3.w & iclk3) | (reg4.x & clock3);
+            reg4.x = (reg4.x & iclk3) | (reg4.y & clock3);
+            reg4.y = (reg4.y & iclk3) | (reg4.z & clock3);
+            reg4.z = (reg4.z & iclk3) | (reg4.w & clock3);
+            reg4.w = (reg4.w & iclk3) | (reg5.x & clock3);
+            reg5.x = (reg5.x & iclk3) | (reg5.y & clock3);
+            reg5.y = (reg5.y & iclk3) | (reg5.z & clock3);
+            reg5.z = (reg5.z & iclk3) | (reg5.w & clock3);
+            reg5.w = (reg5.w & iclk3) | (reg6.x & clock3);
+            reg6.x = (reg6.x & iclk3) | (reg6.y & clock3);
+            reg6.y = (reg6.y & iclk3) | (reg6.z & clock3);
+            reg6.z = (reg6.z & iclk3) | fb3;
+            reg6.w = (reg6.w & iclk2) | (reg7.x & clock2);;
+            reg7.x = (reg7.x & iclk2) | (reg7.y & clock2);
+            reg7.y = (reg7.y & iclk2) | (reg7.z & clock2);
+            reg7.z = (reg7.z & iclk2) | (reg7.w & clock2);
+            reg7.w = (reg7.w & iclk2) | (reg8.x & clock2);
+            reg8.x = (reg8.x & iclk2) | (reg8.y & clock2);
+            reg8.y = (reg8.y & iclk2) | (reg8.z & clock2);
+            reg8.z = (reg8.z & iclk2) | (reg8.w & clock2);
+            reg8.w = (reg8.w & iclk2) | (reg9.x & clock2);
+            reg9.x = (reg9.x & iclk2) | (reg9.y & clock2);
+            reg9.y = (reg9.y & iclk2) | (reg9.z & clock2);
+            reg9.z = (reg9.z & iclk2) | (reg9.w & clock2);
+            reg9.w = (reg9.w & iclk2) | (reg10.x & clock2);
+            reg10.x = (reg10.x & iclk2) | (reg10.y & clock2);
+            reg10.y = (reg10.y & iclk2) | (reg10.z & clock2);
+            reg10.z = (reg10.z & iclk2) | (reg10.w & clock2);
+            reg10.w = (reg10.w & iclk2) | (reg11.x & clock2);
+            reg11.x = (reg11.x & iclk2) | (reg11.y & clock2);
+            reg11.y = (reg11.y & iclk2) | (reg11.z & clock2);
+            reg11.z = (reg11.z & iclk2) | (reg11.w & clock2);
+            reg11.w = (reg11.w & iclk2) | (reg12.x & clock2);
+            reg12.x = (reg12.x & iclk2) | fb2;
+            reg12.y = (reg12.y & iclk1) | (reg12.z & clock1);
+            reg12.z = (reg12.z & iclk1) | (reg12.w & clock1);
+            reg12.w = (reg12.w & iclk1) | (reg13.x & clock1);
+            reg13.x = (reg13.x & iclk1) | (reg13.y & clock1);
+            reg13.y = (reg13.y & iclk1) | (reg13.z & clock1);
+            reg13.z = (reg13.z & iclk1) | (reg13.w & clock1);
+            reg13.w = (reg13.w & iclk1) | (reg14.x & clock1);
+            reg14.x = (reg14.x & iclk1) | (reg14.y & clock1);
+            reg14.y = (reg14.y & iclk1) | (reg14.z & clock1);
+            reg14.z = (reg14.z & iclk1) | (reg14.w & clock1);
+            reg14.w = (reg14.w & iclk1) | (reg15.x & clock1);
+            reg15.x = (reg15.x & iclk1) | (reg15.y & clock1);
+            reg15.y = (reg15.y & iclk1) | (reg15.z & clock1);
+            reg15.z = (reg15.z & iclk1) | (reg15.w & clock1);
+            reg15.w = (reg15.w & iclk1) | (reg16.x & clock1);
+            reg16.x = (reg16.x & iclk1) | (reg16.y & clock1);
+            reg16.y = (reg16.y & iclk1) | (reg16.z & clock1);
+            reg16.z = (reg16.z & iclk1) | (reg16.w & clock1);
+            reg16.w = (reg16.w & iclk1) | fb1;
+            out1.w   = (reg1.x ^ reg6.w ^ reg12.y);
+
+            state[my+j] = out1;
+        }
+	}
+
+    if (res!=0xffffffffu) {
+        /* Aborted, restore register states */
+        out1 = state[my];
+        out2 = state[my+1];
+        out3 = state[my+2];
+        out4 = state[my+3];
+        out5 = state[my+4];
+        out6 = state[my+5];
+        out7 = state[my+6];
+        out8 = state[my+7];
+        out9 = state[my+8];
+        out10 = state[my+9];
+        out11 = state[my+10];
+        out12 = state[my+11];
+        out13 = state[my+12];
+        out14 = state[my+13];
+        out15 = state[my+14];
+        out16 = state[my+15];
+
+        out1 = reg1 ^ fin1;
+        out2 = reg2 ^ fin2;
+        out3 = reg3 ^ fin3;
+        out4 = reg4 ^ fin4;
+        out5 = reg5 ^ fin5;
+        out6 = reg6 ^ fin6;
+        out7 = reg7 ^ fin7;
+        out8 = reg8 ^ fin8;
+        out9 = reg9 ^ fin9;
+        out10 = reg10 ^ fin10;
+        out11 = reg11 ^ fin11;
+        out12 = reg12 ^ fin12;
+        out13 = reg13 ^ fin13;
+        out14 = reg14 ^ fin14;
+        out15 = reg15 ^ fin15;
+        out16 = reg16 ^ fin16;
+
+        state[my+0] = out1;
+        state[my+1] = out2;
+        state[my+2] = out3;
+        state[my+3] = out4;
+        state[my+4] = out5;
+        state[my+5] = out6;
+        state[my+6] = out7;
+        state[my+7] = out8;
+        state[my+8] = out9;
+        state[my+9] = out10;
+        state[my+10] = out11;
+        state[my+11] = out12;
+        state[my+12] = out13;
+        state[my+13] = out14;
+        state[my+14] = out15;
+        state[my+15] = out16;
+    }
+
+    result = uint2(res, i);
+}
+
