@@ -60,7 +60,7 @@ IndexWriter::IndexWriter(std::string &path,
     }
 
     uint64_t seek_offset = 0;
-    char* colon = strchr(path.c_str(),':');
+    const char* colon = strchr(path.c_str(),':');
     if (colon) {
         sscanf(&colon[1],"%lli",&seek_offset);
         const char* ch = path.c_str();
