@@ -552,3 +552,11 @@ void A5Slice::flush()
 {
     calCtxFlush(*mCtx);
 }
+
+/**
+ * Static function to avoid uneccesary dependencies on CalDevice...
+ */
+int A5Slice::getNumDevices()
+{
+    return CalDevice::getNumDevices();
+}

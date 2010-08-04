@@ -38,6 +38,7 @@ AtiA5::AtiA5(int max_rounds, int condition, unsigned int gpu_mask, int pipeline_
     mMaxRound = max_rounds;
     mPipelineSize = 0;
     mPipelineMul = pipeline_mul;
+    mGpuMask = gpu_mask;
 
     /* Init semaphore */
     sem_init( &mMutex, 0, 1 );
@@ -177,20 +178,25 @@ void AtiA5::Process(void)
     struct timeval tStart;
     struct timeval tEnd;
 
-    int core = 1;
-    int numCores = 2;
-
-    printf("Running on %i GPUs\n", core);
+    int numCores = A5Slice::getNumDevices();
+    int numSlices = 0;
+    for(int i=0; i<numCores; i++) {
+        if ((1<<i)&mGpuMask) numSlices++;
+    }
+    printf("Running on %i GPUs\n", numSlices);
     
-    int numSlices = core;
     int pipes = 0;
 
     A5Slice* slices[numSlices];
     
-    for( int i=0; i<numSlices ; i++ ) {
-        slices[i] = new A5Slice( this, i%numCores, mCondition,
-                                 mMaxRound, mPipelineMul );
-        pipes += 32*slices[i]->getNumSlots();
+    int core = 0;
+    for( int i=0; i<numCores ; i++ ) {
+        if ((1<<i)&mGpuMask) {
+            slices[core] = new A5Slice( this, i, mCondition,
+                                        mMaxRound, mPipelineMul );
+            pipes += 32*slices[core]->getNumSlots();
+            core++;
+        }
     }
 
     /* update after everything is created, compiled and linked */

@@ -102,6 +102,7 @@ private:
     int mPipelineMul;
 
     bool mRunning; /* false stops worker thread */
+    unsigned int mGpuMask;
 
     /* Mutex semaphore to protect the queues */
     sem_t mMutex;

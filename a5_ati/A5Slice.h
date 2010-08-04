@@ -74,6 +74,8 @@ public:
     void makeAvailable(int num) { mAvailable = num; }
     int getNumJobs() { return mNumJobs; }
 
+    static int getNumDevices();
+
 private:
     void process();
     void populate();
