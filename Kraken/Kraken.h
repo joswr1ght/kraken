@@ -30,7 +30,7 @@ public:
 
     bool isUsingAti() {return mUsingAti;}
 
-    void reportFind(string);
+    void reportFind(string, int client);
     static void serverCmd(int, string);
 
 private:
@@ -43,11 +43,12 @@ private:
     sem_t mMutex;
     queue<string> mWorkOrders;
     queue<int> mWorkClients;
-    int mCurrentClient;
     bool mUsingAti;
     bool mBusy;
-    struct timeval mStartTime;
     ServerCore* mServer;
+    unsigned int mJobCounter;
+    map<unsigned int, int> mJobMap;
+    map<unsigned int, struct timeval> mTimingMap;
 };
 
 

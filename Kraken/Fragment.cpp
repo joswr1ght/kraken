@@ -47,7 +47,9 @@ Fragment::Fragment(uint64_t plaintext, unsigned int round,
     mNumRound(round),
     mAdvance(advance),
     mTable(table),
-    mState(0)
+    mState(0),
+    mJobNum(0),
+    mClientId(0)
 {
 }
 
@@ -97,9 +99,9 @@ void Fragment::handleSearchResult(uint64_t result, int start_round)
         if (start_round<0) {
             /* Found */
             char msg[128];
-            snprintf(msg,128,"Found %016llx @ %i    (table:%i)\n", result, mBitPos, mAdvance);
+            snprintf(msg,128,"Found %016llx @ %i  #%i  (table:%i)\n", result, mBitPos, mJobNum, mAdvance);
             printf("%s",msg);
-            Kraken::getInstance()->reportFind(string(msg));
+            Kraken::getInstance()->reportFind(string(msg),mClientId);
         }
         return Kraken::getInstance()->removeFragment(this);
     } else {

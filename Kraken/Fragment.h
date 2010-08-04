@@ -23,6 +23,11 @@ public:
     void setBitPos(int pos) {mBitPos=pos;}
     int getBitPos() {return mBitPos;}
 
+    void setJobNum(unsigned int j) {mJobNum=j;}
+    unsigned int getJobNum() {return mJobNum;}
+    void setClientId(int id) {mClientId=id;}
+    int getClientId() {return mClientId;}
+
     void handleSearchResult(uint64_t result, int start_round);
 
 private:
@@ -32,6 +37,8 @@ private:
     DeltaLookup* mTable;
     int mBitPos;
     int mState;
+    unsigned int mJobNum;
+    int mClientId;
 
     uint64_t mEndpoint;
     uint64_t mBlockStart;

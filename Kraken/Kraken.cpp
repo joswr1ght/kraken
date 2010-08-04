@@ -64,7 +64,7 @@ Kraken::Kraken(const char* config, int server_port) :
                 char num[32];
                 sprintf( num,"/%u.idx", advance );
                 string indexFile = string(config)+string(num);
-                // if (advance==340) {
+                // if (advance==340)
                 {
                     DeltaLookup* dl = new DeltaLookup(mDevices[devno],indexFile);
                     dl->setBlockOffset(offset);
@@ -92,11 +92,11 @@ Kraken::Kraken(const char* config, int server_port) :
     }
 
     mBusy = false;
-    mCurrentClient = 0;
     mServer = NULL;
     if (server_port) {
         mServer = new ServerCore(server_port, serverCmd);
     }
+    mJobCounter = 0;
 }
 
 Kraken::~Kraken()
@@ -142,78 +142,98 @@ bool Kraken::Tick()
     if (mUsingAti) {
         while (A5AtiPopResult(start_val, stop_val, (void**)&frag)) {
             frag->handleSearchResult(stop_val, 0);
-            // removeFragment(frag);
         }
     }
 
     sem_wait(&mMutex);
-    if (mFragments.size()==0) {
-        if (mWorkOrders.size()>0) {
-            /* Start a new job */
-            gettimeofday(&mStartTime, NULL);
-            string work = mWorkOrders.front();
-            mBusy = true;
-            mWorkOrders.pop();
-            mCurrentClient = mWorkClients.front();
-            mWorkClients.pop();
-            const char* plaintext = work.c_str();
-            if (mCurrentClient && mServer) {
-                string txt = string("Cracking ")+work+string("\n");
-                mServer->Write(mCurrentClient, txt);
-            }
-            printf("Cracking %s\n", plaintext );
-
-            size_t len = strlen(plaintext);
-            int samples = len - 63;
-            for (int i=0; i<samples; i++) {
-                uint64_t plain = 0;
-                uint64_t plainrev = 0;
-                for (int j=0;j<64;j++) {
-                    if (plaintext[i+j]=='1') {
-                        plain = plain | (1ULL<<j);
-                        plainrev = plainrev | (1ULL<<(63-j));
-                    }
-                }
-                tableListIt it = mTables.begin();
-                while (it!=mTables.end()) {
-                    for (int k=0; k<8; k++) {
-                        Fragment* fr = new Fragment(plainrev,k,(*it).second,(*it).first);
-                        fr->setBitPos(i);
-                        mFragments[fr] = 0;
-                        if (mUsingAti) {
-                            A5AtiSubmit(plain, k, (*it).first, fr);
-                        } else {
-                            A5CpuSubmit(plain, k, (*it).first, fr);
-                        }
-                    }
-                    it++;
-                }
-            }
-        } else {
-            sem_post(&mMutex);
-            if (mBusy) {
-                char msg[128];
-                struct timeval tv;
-                gettimeofday(&tv, NULL);
-                unsigned long diff = 1000000*(tv.tv_sec-mStartTime.tv_sec);
-                diff += tv.tv_usec-mStartTime.tv_usec;
-                snprintf(msg,128,"crack took %i msec\n",(int)(diff/1000));
-                printf("%s",msg);
-                if (mCurrentClient&&mServer) {
-                    mServer->Write(mCurrentClient, string(msg));
-                }
-                mBusy = false;
-            }
-            return false; /* Idle */
+    if (mWorkOrders.size()>0) {
+        /* Start a new job */
+        string work = mWorkOrders.front();
+        mBusy = true;
+        mWorkOrders.pop();
+        int client = mWorkClients.front();
+        mWorkClients.pop();
+        const char* plaintext = work.c_str();
+        if (client && mServer) {
+            char msg[32];
+            snprintf(msg,32,"Cracking #%i ", mJobCounter);
+            string txt = string(msg)+work+string("\n");
+            mServer->Write(client, txt);
         }
+        printf("Cracking %s\n", plaintext );
+
+        size_t len = strlen(plaintext);
+        int samples = len - 63;
+        int submitted = 0;
+        for (int i=0; i<samples; i++) {
+            uint64_t plain = 0;
+            uint64_t plainrev = 0;
+            for (int j=0;j<64;j++) {
+                if (plaintext[i+j]=='1') {
+                    plain = plain | (1ULL<<j);
+                    plainrev = plainrev | (1ULL<<(63-j));
+                }
+            }
+            tableListIt it = mTables.begin();
+            while (it!=mTables.end()) {
+                for (int k=0; k<8; k++) {
+                    Fragment* fr = new Fragment(plainrev,k,(*it).second,(*it).first);
+                    fr->setBitPos(i);
+                    fr->setJobNum(mJobCounter);
+                    fr->setClientId(client);
+                    mFragments[fr] = 0;
+                    if (mUsingAti) {
+                        A5AtiSubmit(plain, k, (*it).first, fr);
+                    } else {
+                        A5CpuSubmit(plain, k, (*it).first, fr);
+                    }
+                    submitted++;
+                }
+                it++;
+            }
+        }
+        struct timeval start_time;
+        gettimeofday(&start_time, NULL);
+        mTimingMap[mJobCounter] = start_time;
+        mJobMap[mJobCounter] = submitted;
+        mJobCounter++;
+    } else if (mJobMap.size()==0) {
+        mBusy = false;
     }
     sem_post(&mMutex);
-    return true;
+    return mBusy;
 }
 
 void Kraken::removeFragment(Fragment* frag)
 {
     sem_wait(&mMutex);
+    map<unsigned int,int>::iterator it2 = mJobMap.find(frag->getJobNum());
+    if (it2!=mJobMap.end()) {
+        int num = (*it2).second - 1;
+        if (num) {
+            (*it2).second = num;
+        } else {
+            map<unsigned int,struct timeval>::iterator it3 =
+                mTimingMap.find(frag->getJobNum());
+            if (it3!=mTimingMap.end()) {
+                char msg[128];
+                struct timeval tv;
+                gettimeofday(&tv, NULL);
+                struct timeval start_time = (*it3).second;
+                unsigned long diff = 1000000*(tv.tv_sec-start_time.tv_sec);
+                diff += tv.tv_usec-start_time.tv_usec;
+                snprintf(msg,128,"crack #%i took %i msec\n",frag->getJobNum(),
+                         (int)(diff/1000));
+                printf("%s",msg);
+                int client = frag->getClientId();
+                if (client&&mServer) {
+                    mServer->Write(client, string(msg));
+                }
+                mTimingMap.erase(it3);
+            }
+            mJobMap.erase(it2);
+        }
+    }
     map<Fragment*,int>::iterator it = mFragments.find(frag);
     if (it!=mFragments.end()) {
         mFragments.erase(it);
@@ -222,10 +242,10 @@ void Kraken::removeFragment(Fragment* frag)
     sem_post(&mMutex);
 }
 
-void Kraken::reportFind(string found)
+void Kraken::reportFind(string found, int client)
 {
-    if (mCurrentClient && mServer) {
-        mServer->Write(mCurrentClient, found);
+    if (client && mServer) {
+        mServer->Write(client, found);
     }
 }
 
@@ -257,9 +277,8 @@ int main(int argc, char* argv[])
     printf("Commands are: crack test quit\n");
     for (;;) {
         bool busy = kr.Tick();
-        if (busy) {
-            usleep(500);
-        } else if (server_port==0) {
+        usleep(500);
+        if (!busy && server_port==0) {
             printf("\nKraken> ");
             char* ch = fgets(command, 256 , stdin);
             command[255]='\0';
