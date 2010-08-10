@@ -64,7 +64,7 @@ Kraken::Kraken(const char* config, int server_port) :
                 char num[32];
                 sprintf( num,"/%u.idx", advance );
                 string indexFile = string(config)+string(num);
-                // if (advance==340)
+                if (advance==340)
                 {
                     DeltaLookup* dl = new DeltaLookup(mDevices[devno],indexFile);
                     dl->setBlockOffset(offset);
