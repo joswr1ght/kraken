@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "Fragment.h"
 #include "Kraken.h"
 #include "../a5_cpu/A5CpuStubs.h"
