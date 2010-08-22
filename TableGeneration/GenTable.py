@@ -23,7 +23,7 @@ def GetNext():
     return start
 
 while running:
-    chainIndex = 4294967296
+    chainIndex = 0
     # Read our advance (id) parameter
     try:
         f = open("a51id.cgi","r")
