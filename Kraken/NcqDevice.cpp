@@ -26,7 +26,7 @@ NcqDevice::NcqDevice(const char* pzDevNode)
 
     /* Start worker thread */
     mRunning = true;
-    mDevC = pzDevNode[strlen(pzDevNode)-2];
+    mDevC = pzDevNode[7]; // Drive letter
     pthread_create(&mWorker, NULL, thread_stub, (void*)this);
 }
 
