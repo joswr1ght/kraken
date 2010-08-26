@@ -19,7 +19,7 @@ public:
     ~ClientConnection();
 
     int getFd() {return mFd;}
-    int Write(string dat);
+    int Write(string data);
     int Read(string& data);
 
 private:

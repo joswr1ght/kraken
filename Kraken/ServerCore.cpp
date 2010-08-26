@@ -6,7 +6,7 @@
 #include <sys/types.h>
 #include <sys/select.h> 
 #include <fcntl.h>
-
+#include <errno.h>
 
 #define MAX_CLIENTS 25
 
@@ -145,6 +145,7 @@ void ServerCore::Serve()
                         map<unsigned int, ClientConnection*>::iterator it2 = it;
                         it2++;
                         delete client;
+                        close(client->getFd());
                         mClientMap.erase(it);
                         it = it2;
                         continue;
@@ -222,42 +223,27 @@ int ClientConnection::Write(string dat)
 
 int ClientConnection::Read(string &data)
 {
-    char buffer[256];
     int bytes_read;
-    int total_count = 0;
-    int count=255;
-    char *ch;
-    char last_read = 0;
-    bool newline = false;
+    char last_read[2] = "\0";
 
-    ch = buffer;
-    while (total_count < count) {
-        bytes_read = read(mFd, &last_read, 1);
-        if (bytes_read <= 0) {
-            /* The other side may have closed unexpectedly */
-            return -1;
-        }
-
-        if ((last_read=='\r')||(last_read=='\n')) {
-            newline = true;
-            break;
-        }
-
-        *ch++ = last_read;
-        total_count++;
+    errno = 0;
+    bytes_read = read(mFd, &last_read, 1);
+    if ((bytes_read<=0)||errno) {
+        /* The other side may have closed unexpectedly */
+        return -1;
     }
 
-    *ch = '\0';
-
-    mBuffer = mBuffer + string(buffer);
-
-    if (newline) {
-        /* newline read */
-        data = mBuffer;
-        mBuffer = string("");
+    if ((last_read[0]=='\r')||(last_read[0]=='\n')) {
+        if (mBuffer.size()) {
+            data = mBuffer;
+            mBuffer = string("");
+            return 1;
+        }
+        return 0; /* blank line */
     }
 
-    return total_count;
+    mBuffer = mBuffer + string(last_read);
+    return 1;
 }
 
 #if 0
