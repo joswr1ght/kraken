@@ -49,7 +49,7 @@ DeltaLookup::DeltaLookup(NcqDevice* dev, std::string index)
     mBlockIndex = new int[num+1];
     mPrimaryIndex = new uint64_t[num/256];
     size_t alloced = num*sizeof(int)+(num/256)*sizeof(int64_t);
-    printf("Allocated %i bytes.\n",alloced);
+    printf("Allocated %i bytes: %s\n",alloced,index.c_str());
     mNumBlocks = num;
     assert(mBlockIndex);
     uint64_t end;
@@ -72,7 +72,7 @@ DeltaLookup::DeltaLookup(NcqDevice* dev, std::string index)
         }
     }
     mBlockIndex[num] = 0x7fffffff; /* for detecting last index */
-    printf("%llx %llx %llx\n", min,max,mPrimaryIndex[1]);
+    // printf("%llx %llx %llx\n", min,max,mPrimaryIndex[1]);
 
     mLowEndpoint = mPrimaryIndex[0];
     size_t r=fread(&mHighEndpoint,sizeof(uint64_t),1,fd);
