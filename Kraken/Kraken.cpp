@@ -59,7 +59,7 @@ Kraken::Kraken(const char* config, int server_port) :
                 unsigned int advance;
                 uint64_t offset;
                 sscanf(&pFile[pos+7],"%u %u %llu",&devno,&advance,&offset);
-                printf("%u %u %llu\n", devno, advance, offset );
+                // printf("%u %u %llu\n", devno, advance, offset );
                 assert(devno<mNumDevices);
                 char num[32];
                 sprintf( num,"/%u.idx", advance );
@@ -86,6 +86,9 @@ Kraken::Kraken(const char* config, int server_port) :
     if (fd) {
         fclose(fd);
         mUsingAti = true;
+        // Use 1 GPU (first)
+        // A5AtiInit(8,12,0x1,1);
+        // Use all GPUs
         A5AtiInit(8,12,0xffffffff,1);
     } else {
         mUsingAti = false;
@@ -259,6 +262,24 @@ void Kraken::serverCmd(int clientID, string cmd)
         if (len>63) {
             getInstance()->Crack(clientID, ch);
         }
+    } else if (strncmp(command,"list",4)==0) {
+        /* Return a printed list of loaded tables */
+        tableListIt it = mInstance->mTables.begin();
+        string table_list;
+        while (it!=mInstance->mTables.end()) {
+            char num[16];
+            if (table_list.size()) {
+                snprintf(num,16,",%d",(*it).first);
+                table_list = table_list+string(num);
+            } else {
+                snprintf(num,16,"%d",(*it).first);
+                table_list = string(num);
+            }
+            it++;
+        }
+        table_list = string("Tables: ")+table_list+string("\n");
+        printf("%s",table_list.c_str());
+        mInstance->mServer->Write(clientID, table_list);
     }
 }
 
