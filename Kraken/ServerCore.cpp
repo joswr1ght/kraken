@@ -152,7 +152,14 @@ void ServerCore::Serve()
                     }
                     if (status>0) {
                         if (mDispatch) {
+                            /* Release the mutex so dispatched calls
+                             * can write back to socket.
+                             * This is safe, since this is the only thread
+                             * that actually modifies the client connection map
+                             */
+                            sem_post(&mMutex);
                             mDispatch((*it).first,data);
+                            sem_wait(&mMutex);
                         }
                     }
                 }
@@ -213,10 +220,12 @@ ClientConnection::~ClientConnection()
 int ClientConnection::Write(string dat)
 {
     size_t remain = dat.size();
+    size_t pos = 0;
     while(remain) {
-        size_t r = write(mFd, dat.c_str(), dat.size());
+        size_t r = write(mFd, &dat.c_str()[pos], remain);
         if (r<0) break;
         remain-=r;
+        pos+=r;
     }
     return 0;
 }
