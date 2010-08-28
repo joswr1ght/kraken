@@ -10,6 +10,10 @@
 
 Kraken* Kraken::mInstance = NULL;
 
+/**
+ *  Create a singleton like instance of Kraken
+ *  Loads all table indexes into memory
+ */
 Kraken::Kraken(const char* config, int server_port) :
     mNumDevices(0)
 {
@@ -66,15 +70,27 @@ Kraken::Kraken(const char* config, int server_port) :
                 string indexFile = string(config)+string(num);
                 // if (advance==340)
                 {
+                    char num[16];
                     DeltaLookup* dl = new DeltaLookup(mDevices[devno],indexFile);
                     dl->setBlockOffset(offset);
                     mTables.push_back( pair<unsigned int, DeltaLookup*>(advance, dl) );
+                    /* Add to TableInfo list */
+                    if (mTableInfo.size()) {
+                        snprintf(num,16,",%d",advance);
+                        mTableInfo = mTableInfo+string(num);
+                    } else {
+                        snprintf(num,16,"%d",advance);
+                        mTableInfo = string(num);
+                    }
                 }
             }
             pos += len;
         }
         pos++;
     }
+    mTableInfo = string("Tables: ")+mTableInfo+string("\n");
+    printf("%s",mTableInfo.c_str());
+
     delete [] pFile;
 
     /* Init semaphore */
@@ -102,6 +118,9 @@ Kraken::Kraken(const char* config, int server_port) :
     mJobCounter = 0;
 }
 
+/**
+ *  Cleanup, and free everything.
+ */
 Kraken::~Kraken()
 {
     tableListIt it = mTables.begin();
@@ -123,6 +142,9 @@ Kraken::~Kraken()
     sem_destroy(&mMutex);
 }
 
+/**
+ *  Recieve a crack command and insert into mutex protected queue.
+ */
 void Kraken::Crack(int client, const char* plaintext)
 {
     sem_wait(&mMutex);
@@ -131,6 +153,9 @@ void Kraken::Crack(int client, const char* plaintext)
     sem_post(&mMutex);
 }
 
+/**
+ *  Main woker thread loop
+ */
 bool Kraken::Tick()
 {
     uint64_t start_val;
@@ -207,6 +232,9 @@ bool Kraken::Tick()
     return mBusy;
 }
 
+/**
+ *  Remove and delete a fragment from the work list maps
+ */
 void Kraken::removeFragment(Fragment* frag)
 {
     sem_wait(&mMutex);
@@ -245,6 +273,9 @@ void Kraken::removeFragment(Fragment* frag)
     sem_post(&mMutex);
 }
 
+/**
+ * Report a found key back to the issuing client
+ */
 void Kraken::reportFind(string found, int client)
 {
     if (client && mServer) {
@@ -252,6 +283,9 @@ void Kraken::reportFind(string found, int client)
     }
 }
 
+/**
+ *  Recieve and parse commands from clients
+ */
 void Kraken::serverCmd(int clientID, string cmd)
 {
     const char* command = cmd.c_str();
@@ -264,25 +298,14 @@ void Kraken::serverCmd(int clientID, string cmd)
         }
     } else if (strncmp(command,"list",4)==0) {
         /* Return a printed list of loaded tables */
-        tableListIt it = mInstance->mTables.begin();
-        string table_list;
-        while (it!=mInstance->mTables.end()) {
-            char num[16];
-            if (table_list.size()) {
-                snprintf(num,16,",%d",(*it).first);
-                table_list = table_list+string(num);
-            } else {
-                snprintf(num,16,"%d",(*it).first);
-                table_list = string(num);
-            }
-            it++;
-        }
-        table_list = string("Tables: ")+table_list+string("\n");
-        printf("%s",table_list.c_str());
-        mInstance->mServer->Write(clientID, table_list);
+        printf("%s",mInstance->mTableInfo.c_str());
+        mInstance->mServer->Write(clientID, mInstance->mTableInfo);
     }
 }
 
+/**
+ * Program entry point
+ */
 int main(int argc, char* argv[])
 {
     if (argc<2) {
