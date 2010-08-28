@@ -49,6 +49,7 @@ private:
     unsigned int mJobCounter;
     map<unsigned int, int> mJobMap;
     map<unsigned int, struct timeval> mTimingMap;
+    map<unsigned int, int> mActiveMap;
     string mTableInfo;
 };
 

@@ -82,6 +82,8 @@ Kraken::Kraken(const char* config, int server_port) :
                         snprintf(num,16,"%d",advance);
                         mTableInfo = string(num);
                     }
+                    /* Make an entry in the active map */
+                    mActiveMap[advance]=1;
                 }
             }
             pos += len;
@@ -190,8 +192,47 @@ bool Kraken::Tick()
         }
         printf("Cracking %s\n", plaintext );
 
-        size_t len = strlen(plaintext);
-        int samples = len - 63;
+        /* Set the active map to indicate which tables shall be used */
+        const char* tablist = strchr( plaintext, '[' );
+        if (tablist) {
+            /* Start with no active */
+            map<unsigned int,int>::iterator it = mActiveMap.begin();
+            while (it!=mActiveMap.end()) {
+                (*it).second = 0;
+                it++;
+            }
+            tablist++;
+            unsigned int num;
+            while(sscanf(tablist,"%d",&num)==1) {
+                it = mActiveMap.find(num);
+                if (it!=mActiveMap.end()) {
+                    (*it).second = 1;
+                }
+                while ((*tablist>='0')&&(*tablist<='9')) {
+                    tablist++;
+                }
+                if (*tablist==',') {
+                    tablist++;
+                } else break;
+            }
+        } else {
+            /* All active */
+            map<unsigned int,int>::iterator it = mActiveMap.begin();
+            while (it!=mActiveMap.end()) {
+                (*it).second = 1;
+                it++;
+            }
+        }
+
+
+        /* Count samples that may be checked from known plaintext */
+        int samples = 0;
+        const char* ch = plaintext;
+        while( *ch=='0' || *ch=='1') {
+            ch++;
+            samples++;
+        }
+        samples -= 63;
         int submitted = 0;
         for (int i=0; i<samples; i++) {
             uint64_t plain = 0;
@@ -204,6 +245,12 @@ bool Kraken::Tick()
             }
             tableListIt it = mTables.begin();
             while (it!=mTables.end()) {
+                /* Skip if not active */
+                if (mActiveMap[(*it).first]==0) {
+                    it++;
+                    continue;
+                }
+                /* Create fragments for sample */ 
                 for (int k=0; k<8; k++) {
                     Fragment* fr = new Fragment(plainrev,k,(*it).second,(*it).first);
                     fr->setBitPos(i);
@@ -220,10 +267,20 @@ bool Kraken::Tick()
                 it++;
             }
         }
-        struct timeval start_time;
-        gettimeofday(&start_time, NULL);
-        mTimingMap[mJobCounter] = start_time;
-        mJobMap[mJobCounter] = submitted;
+        if (submitted) {
+            struct timeval start_time;
+            gettimeofday(&start_time, NULL);
+            mTimingMap[mJobCounter] = start_time;
+            mJobMap[mJobCounter] = submitted;
+        } else {
+            /* No job was actually started - report completion */
+            char msg[128];
+            snprintf(msg,128,"crack #%i took 0 msec\n",mJobCounter);
+            printf("%s",msg);
+            if (client&&mServer) {
+                mServer->Write(client, string(msg));
+            }
+        }
         mJobCounter++;
     } else if (mJobMap.size()==0) {
         mBusy = false;
