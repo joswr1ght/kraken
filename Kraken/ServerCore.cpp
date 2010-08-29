@@ -7,6 +7,7 @@
 #include <sys/select.h> 
 #include <fcntl.h>
 #include <errno.h>
+#include <stdio.h>
 
 #define MAX_CLIENTS 25
 
