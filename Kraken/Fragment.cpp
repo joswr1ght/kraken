@@ -70,14 +70,14 @@ void Fragment::processBlock(const void* pDataBlock)
             if (mNumRound) {
                 int res = A5AtiSubmitPartial(search_rev, mNumRound, mAdvance, this);
                 if (res<0) printf("Fail\n");
-                mState = 2;
+                mState = 3;
             } else {
                 A5CpuKeySearch(search_rev, mKnownPlaintext, 0, mNumRound+1, mAdvance, this);
-                mState = 1;
+                mState = 2;
             }
         } else {
             A5CpuKeySearch(search_rev, mKnownPlaintext, 0, mNumRound+1, mAdvance, this);
-            mState = 1;
+            mState = 2;
         }
     } else {
         /* not found */
@@ -94,11 +94,12 @@ void Fragment::handleSearchResult(uint64_t result, int start_round)
     if (mState==0) {
         mEndpoint = result;
         mTable->StartEndpointSearch(this, mEndpoint, mBlockStart);
+        mState = 1;
         if (mBlockStart==0ULL) {
             /* Endpoint out of range */
             return Kraken::getInstance()->removeFragment(this);
         }
-    } else if (mState==1) {
+    } else if (mState==2) {
         if (start_round<0) {
             /* Found */
             char msg[128];
@@ -111,6 +112,6 @@ void Fragment::handleSearchResult(uint64_t result, int start_round)
         /* We are here because of a partial GPU search */
         /* search final round with CPU */
         A5CpuKeySearch(result, mKnownPlaintext, mNumRound-1, mNumRound+1, mAdvance, this);
-        mState = 1;
+        mState = 2;
     }
 }

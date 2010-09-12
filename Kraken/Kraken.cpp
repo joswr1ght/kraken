@@ -339,7 +339,6 @@ void Kraken::showFragments()
         printf("%d ", (*it).first );
         it++;
     }
-    printf("] ");
     unsigned int histogram[4];
     histogram[0] = 0;
     histogram[1] = 0;
