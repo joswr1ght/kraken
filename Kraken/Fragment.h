@@ -30,6 +30,8 @@ public:
 
     void handleSearchResult(uint64_t result, int start_round);
 
+    int getState() {return mState;}
+
 private:
     uint64_t mKnownPlaintext;
     unsigned int mNumRound;

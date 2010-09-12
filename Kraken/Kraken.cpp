@@ -332,16 +332,33 @@ void Kraken::removeFragment(Fragment* frag)
 
 void Kraken::showFragments()
 {
+    sem_wait(&mMutex);
     map<unsigned int,int>::iterator it = mJobMap.begin();
+    printf("Active jobs[");
     while (it!=mJobMap.end()) {
-        printf("*** JOB %d ***", (*it).first );
+        printf("%d ", (*it).first );
         it++;
     }
+    printf("] ");
+    unsigned int histogram[4];
+    histogram[0] = 0;
+    histogram[1] = 0;
+    histogram[2] = 0;
+    histogram[3] = 0;
+    int total = 0;
     map<Fragment*,int>::iterator it2 = mFragments.begin();
-    if (it2!=mFragments.end()) {
-        printf("frag %p\n",(*it2).first);
+    while (it2!=mFragments.end()) {
+        int state = (*it2).first->getState();
+        if ((state>=0)&&(state<4)) {
+            histogram[state]++;
+            total++;
+        }
+        // printf("frag %p %d\n",(*it2).first, state);
         it2++;
     }
+    sem_post(&mMutex);
+    printf("] state counts (%d): %d %d %d %d\n", total, 
+           histogram[0],histogram[1],histogram[2],histogram[3]);
 }
 
 /**
@@ -389,10 +406,28 @@ int main(int argc, char* argv[])
     if (argc>2) server_port=atoi(argv[2]);
     Kraken kr(argv[1], server_port);
 
+    struct timeval debug_timer;
+    struct timeval dbg2;
+    gettimeofday(&debug_timer, NULL);
+
     printf("Commands are: crack test quit\n");
     for (;;) {
         bool busy = kr.Tick();
         usleep(500);
+        
+#if 0
+        // Debug progress over time.
+        if (busy) {
+            gettimeofday(&dbg2, NULL);
+            unsigned long diff = 1000000*(dbg2.tv_sec-debug_timer.tv_sec);
+            diff += dbg2.tv_usec-debug_timer.tv_usec;
+            if (diff>100000) {
+                debug_timer = dbg2;
+                kr.showFragments();
+            }
+        }
+#endif
+
         if (!busy && server_port==0) {
             printf("\nKraken> ");
             char* ch = fgets(command, 256 , stdin);
