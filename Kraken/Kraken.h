@@ -33,6 +33,8 @@ public:
     void reportFind(string, int client);
     static void serverCmd(int, string);
 
+    void showFragments(void);
+
 private:
     int mNumDevices;
     vector<NcqDevice*> mDevices;

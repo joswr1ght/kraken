@@ -4,7 +4,6 @@
 #include "../a5_cpu/A5CpuStubs.h"
 #include "../a5_ati/A5AtiStubs.h"
 
-
 static uint64_t kr02_whitening(uint64_t key)
 {
     int i;
@@ -50,7 +49,10 @@ Fragment::Fragment(uint64_t plaintext, unsigned int round,
     mTable(table),
     mState(0),
     mJobNum(0),
-    mClientId(0)
+    mClientId(0),
+    mEndpoint(0),
+    mBlockStart(0),
+    mStartIndex(0)
 {
 }
 

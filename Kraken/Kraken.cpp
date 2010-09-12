@@ -68,7 +68,7 @@ Kraken::Kraken(const char* config, int server_port) :
                 char num[32];
                 sprintf( num,"/%u.idx", advance );
                 string indexFile = string(config)+string(num);
-                // if (advance==340)
+                // if (advance==372)
                 {
                     char num[16];
                     DeltaLookup* dl = new DeltaLookup(mDevices[devno],indexFile);
@@ -328,6 +328,20 @@ void Kraken::removeFragment(Fragment* frag)
         delete frag;
     }
     sem_post(&mMutex);
+}
+
+void Kraken::showFragments()
+{
+    map<unsigned int,int>::iterator it = mJobMap.begin();
+    while (it!=mJobMap.end()) {
+        printf("*** JOB %d ***", (*it).first );
+        it++;
+    }
+    map<Fragment*,int>::iterator it2 = mFragments.begin();
+    if (it2!=mFragments.end()) {
+        printf("frag %p\n",(*it2).first);
+        it2++;
+    }
 }
 
 /**
