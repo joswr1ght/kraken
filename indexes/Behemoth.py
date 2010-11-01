@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import os
 import sys
+import re
 
 def ReadConfig(path):
     config = {}
@@ -103,7 +104,8 @@ def AddDeltaTable(path,id,config):
         return config
     dev,name,offset = free
     ids = str(id)
-    os.system("./TableConvert di %s %s %s" % (path,name+":"+str(offset),ids+".idx"))
+    #os.system("./TableConvert di %s %s %s" % (path,name+":"+str(offset),ids+".idx"))
+    print("./TableConvert di %s %s %s" % (path,name+":"+str(offset),ids+".idx"))
     name,max,tables = config[dev]
     tables[id] = offset
     config[dev] = name,max,tables
@@ -124,9 +126,9 @@ def AddRecurse(aRoot,path,config):
                 config = AddSsdTable(src,int(e),config)
             else:
                 config = AddRecurse(aRoot,path+"/"+e,config)
-        elif len(e)>4 and e[-4:]==".dlt":
-            name = e[:-4]
-            config = AddDeltaTable(src,int(name),config)
+	rematch = re.search('(?:a51_table_)?([\d]+)\.dlt', e)
+	if rematch:
+            config = AddDeltaTable(src,int(rematch.group(1)),config)
     return config
 
 c = ReadConfig("tables.conf")

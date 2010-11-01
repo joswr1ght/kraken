@@ -8,11 +8,17 @@
 #include <sys/mman.h>
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
+#include <stdlib.h>
 
 NcqDevice::NcqDevice(const char* pzDevNode)
 {
-    mDevice = open(pzDevNode,O_RDONLY);
-    assert(mDevice>=0);
+#ifdef O_BINARY
+    mDevice = open(pzDevNode, O_RDONLY | O_BINARY);
+#else
+    mDevice = open(pzDevNode, O_RDONLY);
+#endif
+    if (mDevice < 0) { perror(pzDevNode); exit(1); }
 
     /* Set up free list */
     for (int i=0; i<32; i++) {

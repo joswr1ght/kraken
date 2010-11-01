@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "Bidirectional.h"
 #include "TheMatrix.h"
+#include <string.h>
+#include <stdlib.h>
 
 int main(int argc, char* argv[])
 {
@@ -33,6 +35,10 @@ int main(int argc, char* argv[])
 
     unsigned framecount2 = -1;
     if (argc>=6) {
+	if (strlen(argv[5]) != 114) {
+		fprintf(stderr, "burst2 must be a 114 digit bitstring\n");
+		exit(1);
+	}
         sscanf(argv[4],"%i",&framecount2);
     }
 

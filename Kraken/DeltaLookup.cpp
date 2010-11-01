@@ -37,9 +37,9 @@ unsigned char DeltaLookup::mBits[256];
 DeltaLookup::DeltaLookup(NcqDevice* dev, std::string index)
 {
     /* Load index - compress to ~41MB of alloced memory */
-    FILE* fd = fopen(index.c_str(),"r");
+    FILE* fd = fopen(index.c_str(),"rb");
     if (fd==0) {
-        printf("Could not open %s for reading.\n", index.c_str());
+        fprintf(stderr, "Could not open %s for reading.\n", index.c_str());
     }
     assert(fd);
     fseek(fd ,0 ,SEEK_END );
@@ -47,7 +47,7 @@ DeltaLookup::DeltaLookup(NcqDevice* dev, std::string index)
     unsigned int num = (size / sizeof(uint64_t))-1;
     fseek(fd ,0 ,SEEK_SET );
     mBlockIndex = new int[num+1];
-    mPrimaryIndex = new uint64_t[num/256];
+    mPrimaryIndex = new uint64_t[num/256 + 1];
     size_t alloced = num*sizeof(int)+(num/256)*sizeof(int64_t);
     printf("Allocated %i bytes: %s\n",alloced,index.c_str());
     mNumBlocks = num;
@@ -64,8 +64,10 @@ DeltaLookup::DeltaLookup(NcqDevice* dev, std::string index)
         last = end>>12;
         if (offset>max) max = offset;
         if (offset<min) min = offset;
-        assert(offset<0x7fffffff);
-        assert(offset>-0x7fffffff);
+	if (offset >= 0x7fffffff || offset <=-0x7fffffff) {
+		fprintf("index file corrupt: %s\n", index.c_str());
+		exit(1);
+	}
         mBlockIndex[bl]=offset;
         if ((bl&0xff)==0) {
             mPrimaryIndex[bl>>8]=end;
