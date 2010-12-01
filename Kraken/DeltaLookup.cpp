@@ -64,10 +64,10 @@ DeltaLookup::DeltaLookup(NcqDevice* dev, std::string index)
         last = end>>12;
         if (offset>max) max = offset;
         if (offset<min) min = offset;
-	if (offset >= 0x7fffffff || offset <=-0x7fffffff) {
-		fprintf("index file corrupt: %s\n", index.c_str());
-		exit(1);
-	}
+        if (offset >= 0x7fffffff || offset <=-0x7fffffff) {
+            fprintf(stderr,"index file corrupt: %s\n", index.c_str());
+            exit(1);
+        }
         mBlockIndex[bl]=offset;
         if ((bl&0xff)==0) {
             mPrimaryIndex[bl>>8]=end;
