@@ -1,7 +1,6 @@
 #define _FILE_OFFSET_BITS 64
 
 #include "IndexWriter.h"
-#include <sys/stat.h>
 #include <assert.h>
 #include <string.h>
 
