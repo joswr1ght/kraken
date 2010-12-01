@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <queue>
 #include <semaphore.h>
+#if defined(__APPLE__)
+#define mmap64          mmap
+#endif /* __APPLE__ */
 
 using namespace std;
 

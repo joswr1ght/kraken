@@ -8,7 +8,11 @@
 #include <sys/time.h>
 #include <assert.h>
 #include <stdlib.h>
+#if !defined(__APPLE__)
 #include <stropts.h>
+#else 
+#include <unistd.h>
+#endif /* __APPLE__ */
 
 #define READ8()\
     bits = (mBitBuffer>>(mBitCount-8))&0xff;                 \
@@ -39,7 +43,7 @@ DeltaLookup::DeltaLookup(NcqDevice* dev, std::string index)
     /* Load index - compress to ~41MB of alloced memory */
     FILE* fd = fopen(index.c_str(),"rb");
     if (fd==0) {
-        fprintf(stderr, "Could not open %s for reading.\n", index.c_str());
+        printf("Could not open %s for reading.\n", index.c_str());
     }
     assert(fd);
     fseek(fd ,0 ,SEEK_END );
@@ -49,7 +53,7 @@ DeltaLookup::DeltaLookup(NcqDevice* dev, std::string index)
     mBlockIndex = new int[num+1];
     mPrimaryIndex = new uint64_t[num/256 + 1];
     size_t alloced = num*sizeof(int)+(num/256)*sizeof(int64_t);
-    printf("Allocated %i bytes: %s\n",alloced,index.c_str());
+    fprintf(stderr, "Allocated %i bytes: %s\n",alloced,index.c_str());
     mNumBlocks = num;
     assert(mBlockIndex);
     uint64_t end;
