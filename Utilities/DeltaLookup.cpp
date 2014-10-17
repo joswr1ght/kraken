@@ -1,6 +1,7 @@
 #define _FILE_OFFSET_BITS 64
 
 #include "DeltaLookup.h"
+#include <unistd.h>
 #include <iostream>
 #include <stdio.h>
 #include <list>

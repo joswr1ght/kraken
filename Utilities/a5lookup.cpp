@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <unistd.h>
 
 #include "Bidirectional.h"
 #include "SSDlookup.h"

@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stropts.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 SSDlookup::SSDlookup(std::string path, std::string device)
 {

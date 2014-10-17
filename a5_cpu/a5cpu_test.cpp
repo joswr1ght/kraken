@@ -19,6 +19,7 @@
 #include "A5CpuStubs.h"
 #include <stdio.h>
 #include <iostream>
+#include <unistd.h>
 
 
 int main(int argc, char* argv[])
@@ -47,7 +48,7 @@ int main(int argc, char* argv[])
         while (found) {
             found = A5CpuPopResult(rstart,rfinish,start_round,NULL);
             if (found) {
-                printf("CPU Result: %016llx %016llx (%i)\n", rstart, rfinish, start_round);
+                printf("CPU Result: %016lux %016lux (%i)\n", rstart, rfinish, start_round);
                 ncount--;
                 found_now++;
                 // A5CpuSubmit(0xde001bc0006f0000ULL+ctr,0);

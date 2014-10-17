@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #define MAX_CLIENTS 25
 

@@ -53,7 +53,7 @@ DeltaLookup::DeltaLookup(NcqDevice* dev, std::string index)
     mBlockIndex = new int[num+1];
     mPrimaryIndex = new uint64_t[num/256 + 1];
     size_t alloced = num*sizeof(int)+(num/256)*sizeof(int64_t);
-    fprintf(stderr, "Allocated %i bytes: %s\n",alloced,index.c_str());
+    fprintf(stderr, "Allocated %i bytes: %s\n",(int)alloced,index.c_str());
     mNumBlocks = num;
     assert(mBlockIndex);
     uint64_t end;

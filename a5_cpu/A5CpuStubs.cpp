@@ -1,6 +1,7 @@
 #include "A5CpuStubs.h"
 #include <stdio.h>
 #include <dlfcn.h>
+#include <unistd.h>
 
 static bool isDllLoaded = false;
 static bool isDllError  = false;

@@ -103,7 +103,7 @@ void Fragment::handleSearchResult(uint64_t result, int start_round)
         if (start_round<0) {
             /* Found */
             char msg[128];
-            snprintf(msg,128,"Found %016llx @ %i  #%i  (table:%i)\n", result, mBitPos, mJobNum, mAdvance);
+            snprintf(msg,128,"Found %016lux @ %i  #%i  (table:%i)\n", result, mBitPos, mJobNum, mAdvance);
             printf("%s",msg);
             Kraken::getInstance()->reportFind(string(msg),mClientId);
         }

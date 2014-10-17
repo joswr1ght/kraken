@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <map>
 #include <iostream>
+#include <unistd.h>
 
 #include "../a5_cpu/A5CpuStubs.h"
 
