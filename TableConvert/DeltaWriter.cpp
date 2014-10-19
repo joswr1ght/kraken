@@ -70,7 +70,7 @@ DeltaWriter::~DeltaWriter()
         }
         fclose(mFile);
     }
-    printf("%lli chains written, %f bits pr chain.\n",
+    printf("%lui chains written, %f bits pr chain.\n",
            mChainsWritten,
            (float)mBitsWritten/(float)mChainsWritten);
 }

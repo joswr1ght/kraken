@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
     if (argc>=3) {
         uint64_t tst;
         int ticks = atoi(argv[1]);
-        sscanf(argv[2],"%llx",&tst);
+        sscanf(argv[2],"%lux",&tst);
         std::cout << "Start: " << std::hex << tst << "\n";
         tst = back.Forwards(tst, 100, NULL);
         printf("Stepping back 100 + %i ticks.\n", ticks);

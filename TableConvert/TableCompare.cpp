@@ -61,7 +61,7 @@ int main(int argc, const char* argv[])
     }
     cnt++;
 
-    printf("%lli chains read.\n",cnt);
+    printf("%lui chains read.\n",cnt);
 
     delete dr;
     delete dtr;

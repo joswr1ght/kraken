@@ -54,7 +54,7 @@ int main(int argc, const char* argv[])
     cnt++;
     writer->Write(e,i);
 
-    printf("%lli chains written.\n",cnt);
+    printf("%lui chains written.\n",cnt);
 
     delete reader;
     delete writer;

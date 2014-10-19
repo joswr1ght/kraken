@@ -38,13 +38,13 @@ int main(int argc, const char* argv[])
     // printf("%llx %llx\n",e2,i2);
     uint64_t cnt = 0;
     while(more) {
-        printf("%llx %llx\n",e,i);
+        printf("%lux %lux\n",e,i);
         cnt++;
         more = dr->Read(e,i);
     }
     cnt++;
 
-    printf("%lli chains read.\n",cnt);
+    printf("%lui chains read.\n",cnt);
 
     delete dr;
     return 0;

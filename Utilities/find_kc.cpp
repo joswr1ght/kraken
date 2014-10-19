@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 
     unsigned framecount = 0;
     uint64_t stop;
-    sscanf(argv[1],"%llx",&stop);
+    sscanf(argv[1],"%lux",&stop);
     int pos;
     sscanf(argv[2],"%i",&pos);
     Bidirectional back;

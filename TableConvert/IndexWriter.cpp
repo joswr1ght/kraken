@@ -61,10 +61,10 @@ IndexWriter::IndexWriter(std::string &path,
     uint64_t seek_offset = 0;
     const char* colon = strchr(path.c_str(),':');
     if (colon) {
-        sscanf(&colon[1],"%lli",&seek_offset);
+        sscanf(&colon[1],"%lui",&seek_offset);
         const char* ch = path.c_str();
         path = string(ch, colon-ch);
-        printf("seek offset: %lli blocks (%s)\n",seek_offset,path.c_str());
+        printf("seek offset: %lui blocks (%s)\n",seek_offset,path.c_str());
     }
     
 
@@ -125,7 +125,7 @@ IndexWriter::~IndexWriter()
         fclose(mIndexFile);
     }
 
-    printf("%lli chains written, %f bits pr chain.\n",
+    printf("%lui chains written, %f bits pr chain.\n",
            mChainsWritten,
            (float)mBitsWritten/(float)mChainsWritten);
 

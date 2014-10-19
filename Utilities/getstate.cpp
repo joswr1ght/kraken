@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
         uint64_t tst;
         uint64_t orig;
         int ticks = atoi(argv[1]);
-        sscanf(argv[2],"%llx",&tst);
+        sscanf(argv[2],"%lux",&tst);
         orig = tst;
         std::cout << "Start: " << std::hex << tst << "\n";
         tst = back.Forwards(tst, 100+ticks, NULL);

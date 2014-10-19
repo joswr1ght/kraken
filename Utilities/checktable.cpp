@@ -119,7 +119,7 @@ bool CheckResult()
                 fprintf(stderr,"ERROR: Error in chain/table.\n");
                 uint64_t index = start_val;
                 ExtractIndex(index,34);
-                fprintf(stderr,"%016llx -> %016llx should be ??%014llx from index %010llx\n",start_val,stop_val,table_end,index);
+                fprintf(stderr,"%016lux -> %016lux should be ??%014lux from index %010lux\n",start_val,stop_val,table_end,index);
             }
             lookups.erase(it);
         }
