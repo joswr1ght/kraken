@@ -81,7 +81,7 @@ def AddSsdTable(path,id,config):
         return config
     dev,name,offset = free
     ids = str(id)
-    os.system("./TableConvert si %s/blockdevicedata.bin %s/index.dat %s %s" % (path,path,name+":"+str(offset),ids+".idx"))
+    os.system("./../TableConvert/TableConvert si %s/blockdevicedata.bin %s/index.dat %s %s" % (path,path,name+":"+str(offset),ids+".idx"))
     name,max,tables = config[dev]
     tables[id] = offset
     config[dev] = name,max,tables
@@ -104,8 +104,8 @@ def AddDeltaTable(path,id,config):
         return config
     dev,name,offset = free
     ids = str(id)
-    #os.system("./TableConvert di %s %s %s" % (path,name+":"+str(offset),ids+".idx"))
-    print("./TableConvert di %s %s %s" % (path,name+":"+str(offset),ids+".idx"))
+    print("Running \"./../TableConvert/TableConvert di %s %s %s\"" % (path,name+":"+str(offset),ids+".idx"))
+    os.system("./../TableConvert/TableConvert di %s %s %s" % (path,name+":"+str(offset),ids+".idx"))
     name,max,tables = config[dev]
     tables[id] = offset
     config[dev] = name,max,tables
